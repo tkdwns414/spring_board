@@ -58,7 +58,7 @@ public class LoginController {
         if (session != null) {
             session.invalidate();
         }
-        return "redirect:/posts";
+        return "redirect:/";
     }
 
 }
