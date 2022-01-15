@@ -49,7 +49,7 @@ public class LoginController {
         //세션에 로그인 회원 정보 보관
         session.setAttribute("loginMember", loginMember);
 
-        return "redirect:" + redirectURL;
+        return "redirect:/posts" + redirectURL;
     }
 
     @GetMapping("/logout")
@@ -58,7 +58,7 @@ public class LoginController {
         if (session != null) {
             session.invalidate();
         }
-        return "redirect:/";
+        return "redirect:/posts";
     }
 
 }
