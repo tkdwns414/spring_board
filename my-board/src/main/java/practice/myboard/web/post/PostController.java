@@ -11,6 +11,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import practice.myboard.domain.member.Member;
 import practice.myboard.domain.post.Post;
 import practice.myboard.domain.post.PostRepository;
+import practice.myboard.web.argumentresolver.Login;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class PostController {
     private final PostRepository postRepository;
 
     @GetMapping
-    public String posts(@SessionAttribute(name = "loginMember", required = false) Member loginMember, Model model){
+    public String posts(@Login Member loginMember, Model model){
         List<Post> posts = postRepository.findAll();
         model.addAttribute("posts", posts);
         model.addAttribute("member", loginMember);
@@ -32,7 +33,7 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
-    public String post(@PathVariable long postId, @SessionAttribute(name = "loginMember", required = false) Member loginMember, Model model){
+    public String post(@PathVariable long postId, @Login Member loginMember, Model model){
         Post post = postRepository.findById(postId);
         model.addAttribute("post", post);
         model.addAttribute("loginMember", loginMember);
@@ -46,8 +47,7 @@ public class PostController {
     }
 
     @PostMapping("/add")
-    public String addPost(@Validated @ModelAttribute("post") Post form, @SessionAttribute(name = "loginMember",
-            required = false) Member loginMember, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+    public String addPost(@Validated @ModelAttribute("post") Post form, @Login Member loginMember, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
             log.info("errors={}", bindingResult);
@@ -66,8 +66,13 @@ public class PostController {
     }
 
     @GetMapping("/{postId}/edit")
-    public String editForm(@PathVariable Long postId, Model model) {
+    public String editForm(@Login Member loginMember, @PathVariable Long postId, Model model) {
         Post post = postRepository.findById(postId);
+
+        if (post.getWriter() != loginMember){
+            log.info("잘못된 게시물 수정 요청");
+            return "redirect:/posts";
+        }
         model.addAttribute("post", post);
         return "posts/editForm";
     }
@@ -89,7 +94,11 @@ public class PostController {
     }
 
     @GetMapping("{postId}/delete")
-    public String deletePost(@PathVariable long postId){
+    public String deletePost(@PathVariable long postId, @Login Member loginMember){
+        if (postRepository.findById(postId).getWriter() != loginMember){
+            log.info("잘못된 게시물 삭제 요청");
+            return "redirect:/posts";
+        }
         postRepository.delete(postId);
         return "redirect:/posts";
     }

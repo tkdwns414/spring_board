@@ -30,7 +30,7 @@ public class LoginController {
 
     @PostMapping("/login")
     public String login(@Valid @ModelAttribute LoginForm form, BindingResult bindingResult,
-                        @RequestParam(defaultValue = "/") String redirectURL,
+                        @RequestParam(defaultValue = "/posts") String redirectURL,
                         HttpServletRequest request){
 
         if (bindingResult.hasErrors()) {
@@ -50,7 +50,7 @@ public class LoginController {
         //세션에 로그인 회원 정보 보관
         session.setAttribute(SessionConst.LOGIN_MEMBER, loginMember);
 
-        return "redirect:/posts" + redirectURL;
+        return "redirect:" + redirectURL;
     }
 
     @GetMapping("/logout")
